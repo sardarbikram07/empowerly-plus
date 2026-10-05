@@ -30,27 +30,20 @@ empowerly-plus/
 
 ---
 
-## First-time setup
+## Run locally
 
-### 1 – Create local .env files
+### 1 – Environment Setup
 
-Copy the examples and fill in your values:
+Run the setup and check scripts to generate `.env` files automatically:
 
 ```powershell
-# Backend
-Copy-Item backend\.env.example backend\.env
-
-# Scripts
-Copy-Item scripts\.env.example scripts\.env
+cd scripts
+.\setup-env.ps1
+.\check-env.ps1
+cd ..
 ```
 
-Then open each `.env` file and fill in:
-- `MONGODB_URI` – your Atlas connection string (get it from Atlas UI → Connect → Drivers)
-- `JWT_SECRET`  – any random string ≥ 32 characters
-- Leave the rest as defaults for local dev
-
-The frontend reads `VITE_API_URL` from `frontend/.env.local`, but in dev mode
-the Vite proxy forwards `/api` to `localhost:8080` automatically, so no value is needed.
+*Note: Spring only reads `backend/.env` when started from the `backend/` folder.*
 
 ---
 

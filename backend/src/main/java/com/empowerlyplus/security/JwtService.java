@@ -36,6 +36,9 @@ public class JwtService {
     void init() {
         // Derive a proper HMAC key from the configured secret string.
         // The secret must be at least 32 chars for HS256.
+        if (secretString == null || secretString.length() < 32 || secretString.toLowerCase().startsWith("mongodb")) {
+            throw new IllegalStateException("FATAL ERROR: app.jwt.secret must be at least 32 characters and cannot be the MongoDB URI.");
+        }
         signingKey = Keys.hmacShaKeyFor(secretString.getBytes(StandardCharsets.UTF_8));
     }
 
