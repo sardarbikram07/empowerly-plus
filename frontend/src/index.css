@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --color-brand-900: #0f172a;
+    --color-brand-800: #1e293b;
+    --color-brand-700: #334155;
+    --color-brand-600: #475569;
+    --color-accent:    #6366f1;
+    --color-accent-light: #818cf8;
+    --color-success:  #10b981;
+    --color-warning:  #f59e0b;
+    --color-danger:   #ef4444;
+  }
+
+  html, body {
+    @apply h-full bg-slate-950 text-slate-100 antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  #root {
+    @apply h-full;
+  }
+}

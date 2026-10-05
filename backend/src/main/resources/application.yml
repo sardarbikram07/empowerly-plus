@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: empowerlyplus-backend
+  config:
+    # Allows loading a local .env file formatted as .properties (KEY=VALUE lines).
+    # The file is optional so CI environments without it still work.
+    import: "optional:file:.env[.properties]"
+  data:
+    mongodb:
+      uri: ${MONGODB_URI}
+      database: ${MONGODB_DB}
+      # Index creation is managed exclusively via db/indexes.js + mongosh,
+      # never by Spring, to keep DDL in version-controlled scripts.
+      auto-index-creation: false
+
+server:
+  port: 8080
+
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiry-minutes: ${JWT_EXPIRY_MINUTES:60}
+  cors:
+    origin: ${CORS_ORIGIN:http://localhost:5173}
+  gemini:
+    api-key: ${GEMINI_API_KEY:}
+
+logging:
+  level:
+    com.empowerlyplus: DEBUG
+    org.springframework.security: INFO
+
+springdoc:
+  api-docs:
+    path: /api/api-docs
+  swagger-ui:
+    path: /api/swagger-ui.html

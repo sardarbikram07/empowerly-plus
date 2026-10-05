@@ -1,0 +1,20 @@
+# Test profile – used by EmpowerlyplusApplicationTests
+# Provides placeholder values so the context can load without a real Atlas connection.
+# Replace with Flapdoodle embedded MongoDB or Testcontainers for full integration tests.
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017
+      database: empowerlyplus_test
+      auto-index-creation: false
+  config:
+    import: ""   # Disable .env import during tests
+
+app:
+  jwt:
+    secret: test-secret-key-which-is-long-enough-for-hs256
+    expiry-minutes: 60
+  cors:
+    origin: http://localhost:5173
+  gemini:
+    api-key: ""

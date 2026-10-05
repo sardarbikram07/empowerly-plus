@@ -1,0 +1,14 @@
+{
+  "name": "empowerlyplus-scripts",
+  "version": "1.0.0",
+  "description": "Utility scripts for Empowerly+",
+  "private": true,
+  "scripts": {
+    "seed": "node seed.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.5",
+    "mongodb": "^6.9.0"
+  }
+}
