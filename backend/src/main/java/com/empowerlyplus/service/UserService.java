@@ -114,6 +114,11 @@ public class UserService {
         return toDTO(userRepository.save(user));
     }
 
+    public UserDTO update(String id, UpdateUserRequest req, User caller) {
+        boolean isAdmin = caller != null && "ADMIN".equals(caller.getRole());
+        return update(id, req, isAdmin);
+    }
+
     // ── Delete ────────────────────────────────────────────────────────────────
 
     /** ADMIN only. */

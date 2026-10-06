@@ -70,7 +70,7 @@ public class GlobalExceptionHandler {
                 "status",    status.value(),
                 "error",     error,
                 "message",   message != null ? message : "",
-                "path",      path
+                "path",      path != null ? path : ""
         ));
     }
 }
