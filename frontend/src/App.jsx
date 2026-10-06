@@ -1,18 +1,20 @@
 import React from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { AuthProvider } from './context/AuthContext'
+import { AuthProvider, useAuth } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import AppLayout from './layouts/AppLayout'
 import LoginPage from './pages/LoginPage'
-import DashboardPage from './pages/DashboardPage'
+import BranchesPage from './pages/BranchesPage'
+import UsersPage from './pages/UsersPage'
+import ProfilePage from './pages/ProfilePage'
 
-/**
- * Application router.
- * Public routes: /login
- * Protected routes (require JWT): everything under AppLayout
- *
- * Later tasks add feature pages under the protected layout.
- */
+function DefaultRedirect() {
+  const { user } = useAuth()
+  if (user?.role === 'ADMIN') return <Navigate to="/branches" replace />
+  if (user?.role === 'HR') return <Navigate to="/users" replace />
+  return <Navigate to="/profile" replace />
+}
+
 export default function App() {
   return (
     <AuthProvider>
@@ -21,12 +23,23 @@ export default function App() {
           {/* Public */}
           <Route path="/login" element={<LoginPage />} />
 
-          {/* Protected – wrapped in AppLayout shell */}
+          {/* Protected */}
           <Route element={<ProtectedRoute />}>
             <Route element={<AppLayout />}>
-              <Route index element={<Navigate to="/dashboard" replace />} />
-              <Route path="/dashboard" element={<DashboardPage />} />
-              {/* Feature routes will be added here in subsequent tasks */}
+              <Route index element={<DefaultRedirect />} />
+
+              {/* ADMIN only */}
+              <Route element={<ProtectedRoute roles={['ADMIN']} />}>
+                <Route path="/branches" element={<BranchesPage />} />
+              </Route>
+
+              {/* ADMIN and HR */}
+              <Route element={<ProtectedRoute roles={['ADMIN', 'HR']} />}>
+                <Route path="/users" element={<UsersPage />} />
+              </Route>
+
+              {/* All roles */}
+              <Route path="/profile" element={<ProfilePage />} />
             </Route>
           </Route>
 

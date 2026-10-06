@@ -1,5 +1,6 @@
 package com.empowerlyplus.security;
 
+import com.empowerlyplus.domain.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -19,6 +20,14 @@ import java.util.function.Function;
 /**
  * JWT utility service.
  * Generates and validates HMAC-SHA256 signed tokens.
+ *
+ * Token payload includes the custom claims required by the spec:
+ *   sub      → email (Spring Security principal)
+ *   userId   → MongoDB _id (hex string)
+ *   role     → EMPLOYEE | HR | ADMIN
+ *   branchId → hex string
+ *   orgId    → hex string
+ *
  * Secret and expiry come from environment variables (JWT_SECRET, JWT_EXPIRY_MINUTES).
  */
 @Service
@@ -34,10 +43,9 @@ public class JwtService {
 
     @PostConstruct
     void init() {
-        // Derive a proper HMAC key from the configured secret string.
-        // The secret must be at least 32 chars for HS256.
         if (secretString == null || secretString.length() < 32 || secretString.toLowerCase().startsWith("mongodb")) {
-            throw new IllegalStateException("FATAL ERROR: app.jwt.secret must be at least 32 characters and cannot be the MongoDB URI.");
+            throw new IllegalStateException(
+                    "FATAL: app.jwt.secret must be at least 32 characters and cannot be the MongoDB URI.");
         }
         signingKey = Keys.hmacShaKeyFor(secretString.getBytes(StandardCharsets.UTF_8));
     }
@@ -46,11 +54,27 @@ public class JwtService {
     // Token generation
     // ──────────────────────────────────────────────────────────────────────────
 
-    public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+    /**
+     * Generates a JWT for a User entity, embedding all four spec-required claims.
+     */
+    public String generateToken(User user) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("userId",   user.getId());
+        claims.put("role",     user.getRole());
+        claims.put("branchId", user.getBranchId());
+        claims.put("orgId",    user.getOrgId());
+        return buildToken(claims, user);
     }
 
-    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+    /** Overload kept for backward compatibility (e.g. tests). */
+    public String generateToken(UserDetails userDetails) {
+        if (userDetails instanceof User u) {
+            return generateToken(u);
+        }
+        return buildToken(new HashMap<>(), userDetails);
+    }
+
+    private String buildToken(Map<String, Object> extraClaims, UserDetails userDetails) {
         long nowMs = System.currentTimeMillis();
         return Jwts.builder()
                 .claims(extraClaims)
@@ -78,16 +102,19 @@ public class JwtService {
         return extractClaim(token, Claims::getSubject);
     }
 
+    public Claims extractAllClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(signingKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+    }
+
     private boolean isTokenExpired(String token) {
         return extractClaim(token, Claims::getExpiration).before(new Date());
     }
 
     private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        Claims claims = Jwts.parser()
-                .verifyWith(signingKey)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
-        return claimsResolver.apply(claims);
+        return claimsResolver.apply(extractAllClaims(token));
     }
 }

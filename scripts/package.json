@@ -4,7 +4,8 @@
   "description": "Utility scripts for Empowerly+",
   "private": true,
   "scripts": {
-    "seed": "node seed.js"
+    "seed":      "node seed.js",
+    "bootstrap": "node bootstrap.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

@@ -3,8 +3,9 @@ package com.empowerlyplus.domain;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.mapping.FieldType;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,6 +18,9 @@ import java.util.List;
  * Persistence entity for the "users" collection.
  * Implements UserDetails so Spring Security can use it directly.
  * passwordHash is NEVER returned in API responses (enforced by DTOs).
+ *
+ * orgId and branchId are stored as BSON ObjectId in MongoDB (not plain strings)
+ * so the JSON-Schema validator (bsonType: "objectId") accepts the writes.
  */
 @Data
 @NoArgsConstructor
@@ -26,15 +30,22 @@ public class User implements UserDetails {
     @Id
     private String id;
 
-    /** BSON ObjectId stored as string; referencing the organizations collection. */
+    /**
+     * Stored as BSON ObjectId; references the organizations collection.
+     * @Field(targetType = OBJECT_ID) tells the Spring Data codec to encode the
+     * String value as a BSON ObjectId on the wire.
+     */
+    @Field(targetType = FieldType.OBJECT_ID)
     private String orgId;
 
-    /** BSON ObjectId stored as string; referencing the branches collection. */
+    /**
+     * Stored as BSON ObjectId; references the branches collection.
+     */
+    @Field(targetType = FieldType.OBJECT_ID)
     private String branchId;
 
     private String name;
 
-    @Indexed(unique = true)
     private String email;
 
     /** BCrypt hash – NEVER expose in DTOs. */

@@ -1,20 +1,14 @@
-import React from 'react'
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import React, { useState } from 'react'
+import { useNavigate } from 'react'
 import { useAuth } from '../context/AuthContext'
 import api from '../api/axios'
 
-/**
- * LoginPage – placeholder authentication UI.
- * Submits credentials to POST /api/auth/login and stores the returned JWT.
- * Styled with Tailwind; design tokens from index.css.
- */
 export default function LoginPage() {
-  const navigate   = useNavigate()
-  const { login }  = useAuth()
+  const navigate = useNavigate()
+  const { login } = useAuth()
 
-  const [form, setForm]     = useState({ email: '', password: '' })
-  const [error, setError]   = useState(null)
+  const [form, setForm] = useState({ email: '', password: '' })
+  const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
 
   function handleChange(e) {
@@ -28,9 +22,15 @@ export default function LoginPage() {
     try {
       const { data } = await api.post('/api/auth/login', form)
       login(data.token, data.user)
-      navigate('/dashboard')
+      if (data.user?.role === 'ADMIN') {
+        navigate('/branches')
+      } else if (data.user?.role === 'HR') {
+        navigate('/users')
+      } else {
+        navigate('/profile')
+      }
     } catch (err) {
-      setError(err.response?.data?.message ?? 'Login failed. Please try again.')
+      setError(err.response?.data?.message || 'Login failed. Please check your credentials.')
     } finally {
       setLoading(false)
     }
@@ -38,9 +38,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 px-4">
-      {/* Card */}
       <div className="w-full max-w-md">
-        {/* Logo / brand */}
         <div className="mb-10 text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-indigo-600 shadow-lg shadow-indigo-500/30 mb-4">
             <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -52,7 +50,6 @@ export default function LoginPage() {
           <p className="mt-1 text-sm text-slate-400">HR & Workforce Management</p>
         </div>
 
-        {/* Form card */}
         <div className="bg-slate-800/60 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-8 shadow-2xl">
           <h2 className="text-xl font-semibold text-white mb-6">Sign in to your account</h2>
 
@@ -75,10 +72,8 @@ export default function LoginPage() {
                 required
                 value={form.email}
                 onChange={handleChange}
-                className="w-full px-4 py-2.5 bg-slate-900/70 border border-slate-600/50 rounded-lg text-white
-                           placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
-                           transition-all duration-200"
-                placeholder="you@company.com"
+                className="w-full px-4 py-2.5 bg-slate-900/70 border border-slate-600/50 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                placeholder="admin@empowerly.test"
               />
             </div>
 
@@ -94,9 +89,7 @@ export default function LoginPage() {
                 required
                 value={form.password}
                 onChange={handleChange}
-                className="w-full px-4 py-2.5 bg-slate-900/70 border border-slate-600/50 rounded-lg text-white
-                           placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
-                           transition-all duration-200"
+                className="w-full px-4 py-2.5 bg-slate-900/70 border border-slate-600/50 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
                 placeholder="••••••••"
               />
             </div>
@@ -105,9 +98,7 @@ export default function LoginPage() {
               id="login-submit"
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-800 disabled:cursor-not-allowed
-                         text-white font-semibold rounded-lg shadow-lg shadow-indigo-500/20
-                         transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-slate-800"
+              className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-800 disabled:cursor-not-allowed text-white font-semibold rounded-lg shadow-lg shadow-indigo-500/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-slate-800"
             >
               {loading ? 'Signing in…' : 'Sign in'}
             </button>
@@ -115,7 +106,7 @@ export default function LoginPage() {
         </div>
 
         <p className="mt-6 text-center text-xs text-slate-500">
-          Empowerly+ · DBMS Project · &copy; {new Date().getFullYear()}
+          Empowerly+ · DBMS Project
         </p>
       </div>
     </div>
